@@ -74,26 +74,42 @@ Throws:
 
 - `Error` if backup is not found.
 
+#### `backups.convert(id: string) => BackupConvertResult`
+
+Builds a normalized JSON tree for a backup id.
+
+Notes:
+
+- Canonical objects are keyed by id at the backup root (`participants`, `messages`, `attachments`, `reactions`).
+- Chat records reference related entities by id arrays.
+- Includes explicit ownership fields for local user clarity (`isFromMe`, `isByMe`, `authorRole`).
+- Includes `warnings` and `orphans` buckets for unresolved links.
+
 ### `Backup`
 
 Represents one backup.
 
-| Property      | Type          | Description                           |
-| ------------- | ------------- | ------------------------------------- |
-| `id`          | `string`      | Backup folder name                    |
-| `path`        | `string`      | Absolute path to backup folder        |
-| `deviceName`  | `string`      | From `Info.plist`, fallback `Unknown` |
-| `iosVersion`  | `string`      | From `Info.plist`, fallback `Unknown` |
-| `sizeOnDisk`  | `number`      | Currently initialized to `0`          |
-| `chats`       | `Chats`       | Chat accessor scoped to this backup   |
-| `messages`    | `Messages`    | Message accessor across all chats     |
-| `attachments` | `Attachments` | Attachment accessor across all chats  |
+| Property      | Type                        | Description                           |
+| ------------- | --------------------------- | ------------------------------------- |
+| `id`          | `string`                    | Backup folder name                    |
+| `path`        | `string`                    | Absolute path to backup folder        |
+| `deviceName`  | `string`                    | From `Info.plist`, fallback `Unknown` |
+| `iosVersion`  | `string`                    | From `Info.plist`, fallback `Unknown` |
+| `sizeOnDisk`  | `number`                    | Currently initialized to `0`          |
+| `chats`       | `Chats`                     | Chat accessor scoped to this backup   |
+| `messages`    | `Messages`                  | Message accessor across all chats     |
+| `attachments` | `Attachments`               | Attachment accessor across all chats  |
+| `convert`     | `() => BackupConvertResult` | Build normalized backup JSON tree     |
 
 Construction behavior:
 
 - Locates `sms.db` through `Manifest.db` mapping.
 - Opens SQLite in read-only mode.
 - Throws `Error` if the SMS database cannot be resolved.
+
+#### `backup.convert() => BackupConvertResult`
+
+Builds the same normalized JSON tree as `backups.convert(id)` for the already-open backup instance.
 
 ### `Chats`
 

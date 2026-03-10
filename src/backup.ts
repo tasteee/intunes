@@ -9,6 +9,7 @@ import { findSmsDbPath, getManifestPath } from './core'
 import { createAttachments } from './attachments'
 import { createChats } from './chats'
 import { createMessages } from './messages'
+import { convertBackupToTree } from './convert'
 
 import type { BackupT } from './types'
 
@@ -36,8 +37,11 @@ export const getBackup = (backupPath: string): BackupT => {
 
 	const smsDb = new BetterSqlite3(smsDbPath, { readonly: true })
 	const backupStats = fs.statSync(backupPath)
+	const chats = createChats(smsDb, id, backupPath)
+	const messages = createMessages(smsDb, id, backupPath)
+	const attachments = createAttachments(smsDb, id, backupPath)
 
-	return {
+	const backup: BackupT = {
 		id,
 		path: backupPath,
 		deviceName,
@@ -47,8 +51,11 @@ export const getBackup = (backupPath: string): BackupT => {
 		createdAt: backupStats.birthtime,
 		modifiedAt: backupStats.mtime,
 		manifestPath: getManifestPath(backupPath),
-		chats: createChats(smsDb, id, backupPath),
-		messages: createMessages(smsDb, id, backupPath),
-		attachments: createAttachments(smsDb, id, backupPath)
+		chats,
+		messages,
+		attachments,
+		convert: () => convertBackupToTree(backup)
 	}
+
+	return backup
 }
