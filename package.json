@@ -1,0 +1,59 @@
+{
+	"name": "intunes",
+	"version": "0.0.1",
+	"description": "Read iMessage data from local iTunes/Apple device backups on Windows.",
+	"module": "./dist/index.js",
+	"main": "./dist/index.js",
+	"types": "./dist/types.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/types.d.ts",
+			"default": "./dist/index.js"
+		}
+	},
+	"scripts": {
+		"build": "tsc -p tsconfig.build.json && npm run build:types",
+		"build:types": "node -e \"const fs=require('node:fs');fs.mkdirSync('dist',{recursive:true});fs.copyFileSync('src/types.d.ts','dist/types.d.ts');\"",
+		"prepublishOnly": "npm run build"
+	},
+	"type": "module",
+	"license": "MIT",
+	"author": "tasteee",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/tasteee/intunes.git"
+	},
+	"bugs": {
+		"url": "https://github.com/tasteee/intunes/issues"
+	},
+	"homepage": "https://github.com/tasteee/intunes#readme",
+	"keywords": [
+		"itunes",
+		"imessage",
+		"apple",
+		"backup",
+		"sms",
+		"windows"
+	],
+	"files": [
+		"dist",
+		"README.md"
+	],
+	"engines": {
+		"bun": ">=1.0.0"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"devDependencies": {
+		"@types/better-sqlite3": "^7.6.13",
+		"@types/bun": "latest",
+		"@types/node": "^25.3.5",
+		"@types/plist": "^3.0.5",
+		"typescript": "^5.9.3"
+	},
+	"dependencies": {
+		"better-sqlite3": "^12.6.2",
+		"plist": "^3.1.0"
+	}
+}
