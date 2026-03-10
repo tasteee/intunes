@@ -21,27 +21,27 @@ yarn add intunes
 ## Quick Start
 
 ```ts
-import { intunes } from 'intunes';
+import { intunes } from 'intunes'
 
-const backups = intunes.backups.list();
-if (!backups.length) throw new Error('No backups found');
+const backups = intunes.backups.list()
+if (!backups.length) throw new Error('No backups found')
 
-const backup = intunes.backups.get(backups[0].id);
+const backup = intunes.backups.get(backups[0].id)
 
-const chats = backup.chats.list({ limit: 25 });
-const firstChat = chats[0];
+const chats = backup.chats.list({ limit: 25 })
+const firstChat = chats[0]
 
-const messages = firstChat.messages.list({ hasAttachment: true });
-const firstMessage = messages[0];
+const messages = firstChat.messages.list({ hasAttachment: true })
+const firstMessage = messages[0]
 
-const attachments = backup.attachments.list({ type: 'image', limit: 10 });
+const attachments = backup.attachments.list({ type: 'image', limit: 10 })
 
 console.log({
 	backup: backup.id,
 	chatCount: chats.length,
 	firstMessageId: firstMessage?.id,
 	attachmentCount: attachments.length
-});
+})
 ```
 
 ## API Reference
@@ -50,8 +50,8 @@ console.log({
 
 Top-level singleton export.
 
-| Property | Type | Description |
-|----------|------|-------------|
+| Property  | Type      | Description                   |
+| --------- | --------- | ----------------------------- |
 | `backups` | `Backups` | Access and open local backups |
 
 ### `Backups`
@@ -78,16 +78,16 @@ Throws:
 
 Represents one backup.
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `id` | `string` | Backup folder name |
-| `path` | `string` | Absolute path to backup folder |
-| `deviceName` | `string` | From `Info.plist`, fallback `Unknown` |
-| `iosVersion` | `string` | From `Info.plist`, fallback `Unknown` |
-| `sizeOnDisk` | `number` | Currently initialized to `0` |
-| `chats` | `Chats` | Chat accessor scoped to this backup |
-| `messages` | `Messages` | Message accessor across all chats |
-| `attachments` | `Attachments` | Attachment accessor across all chats |
+| Property      | Type          | Description                           |
+| ------------- | ------------- | ------------------------------------- |
+| `id`          | `string`      | Backup folder name                    |
+| `path`        | `string`      | Absolute path to backup folder        |
+| `deviceName`  | `string`      | From `Info.plist`, fallback `Unknown` |
+| `iosVersion`  | `string`      | From `Info.plist`, fallback `Unknown` |
+| `sizeOnDisk`  | `number`      | Currently initialized to `0`          |
+| `chats`       | `Chats`       | Chat accessor scoped to this backup   |
+| `messages`    | `Messages`    | Message accessor across all chats     |
+| `attachments` | `Attachments` | Attachment accessor across all chats  |
 
 Construction behavior:
 
@@ -133,16 +133,17 @@ Throws:
 
 ### `Chat`
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `id` | `string` | Chat ROWID |
-| `displayName` | `string` | Chat name or `Unknown` |
-| `isGroup` | `boolean` | Heuristic based on `chat_identifier` |
-| `participants` | `Handle[]` | Participant handles in chat |
-| `messageCount` | `number` | Count via `chat_message_join` |
-| `lastMessageAt` | `Date \| null` | Currently initialized as `null` |
-| `messages` | `Messages` | Messages scoped to this chat |
-| `attachments` | `Attachments` | Attachments scoped to this chat |
+| Property        | Type           | Description                          |
+| --------------- | -------------- | ------------------------------------ |
+| `id`            | `string`       | Chat ROWID                           |
+| `displayName`   | `string`       | Chat name or `Unknown`               |
+| `isGroup`       | `boolean`      | Heuristic based on `chat_identifier` |
+| `participants`  | `Handle[]`     | Participant handles in chat          |
+| `messageCount`  | `number`       | Count via `chat_message_join`        |
+| `messageDates`  | `string[]`     | Unique message days (`YYYY-MM-DD`)   |
+| `lastMessageAt` | `Date \| null` | Currently initialized as `null`      |
+| `messages`      | `Messages`     | Messages scoped to this chat         |
+| `attachments`   | `Attachments`  | Attachments scoped to this chat      |
 
 #### `chat.export(options: ChatExportOptionsT) => boolean`
 
@@ -164,6 +165,8 @@ Options type:
 
 ```ts
 type MessageListOptionsT = {
+	limit?: number
+	date?: Date | string
 	fromDate?: Date
 	toDate?: Date
 	hasAttachment?: boolean
@@ -175,6 +178,11 @@ type MessageListOptionsT = {
 Defaults:
 
 - Empty defaults object (no filters applied).
+
+Examples:
+
+- Last message in a chat: `chat.messages.list({ limit: 1 })[0]`
+- All messages for a specific day: `chat.messages.list({ date: '2026-03-10' })`
 
 #### `messages.get(id: string) => Message | null`
 
@@ -188,41 +196,42 @@ Behavior:
 
 ### `Message`
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `id` | `string` | Message ROWID |
-| `guid` | `string \| undefined` | Apple GUID when present |
-| `chatId` | `string` | Chat id context |
-| `sender` | `string \| null` | Handle id when present |
-| `isFromMe` | `boolean` | Sent by backup owner |
-| `text` | `string \| null` | Body text |
-| `subject` | `string \| null` | MMS subject |
-| `service` | `'iMessage' \| 'SMS' \| 'MMS' \| 'Unknown'` | Transport service |
-| `sentAt` | `Date \| null` | Normalized Apple epoch date |
-| `deliveredAt` | `Date \| null` | Delivery timestamp |
-| `readAt` | `Date \| null` | Read timestamp |
-| `isSystem` | `boolean` | Non-zero `item_type` |
-| `isTapback` | `boolean` | Always `false` on message objects |
-| `hasAttachments` | `boolean` | Attachment count > 0 |
-| `attachmentIds` | `string[]` | Related attachment ids |
-| `reactions` | `Reaction[]` | Parsed tapback/reaction events |
+| Property         | Type                                        | Description                                  |
+| ---------------- | ------------------------------------------- | -------------------------------------------- |
+| `id`             | `string`                                    | Message ROWID                                |
+| `guid`           | `string \| undefined`                       | Apple GUID when present                      |
+| `chatId`         | `string`                                    | Chat id context                              |
+| `sender`         | `string \| null`                            | Handle id when present                       |
+| `isFromMe`       | `boolean`                                   | Sent by backup owner                         |
+| `text`           | `string \| null`                            | Body text                                    |
+| `subject`        | `string \| null`                            | MMS subject                                  |
+| `service`        | `'iMessage' \| 'SMS' \| 'MMS' \| 'Unknown'` | Transport service                            |
+| `sentAt`         | `Date \| null`                              | Normalized Apple epoch date                  |
+| `deliveredAt`    | `Date \| null`                              | Delivery timestamp                           |
+| `readAt`         | `Date \| null`                              | Read timestamp                               |
+| `isSystem`       | `boolean`                                   | Non-zero `item_type`                         |
+| `isTapback`      | `boolean`                                   | Always `false` on message objects            |
+| `hasAttachments` | `boolean`                                   | Attachment count > 0                         |
+| `attachments`    | `Attachment[]`                              | Resolved attachment objects for this message |
+| `attachmentIds`  | `string[]`                                  | Related attachment ids                       |
+| `reactions`      | `Reaction[]`                                | Parsed tapback/reaction events               |
 
 ### `Reaction`
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `id` | `string` | Reaction row id |
-| `messageId` | `string` | Target message id |
-| `actor` | `string` | Sender handle or `me`/`unknown` |
-| `emoji` | `string` | Resolved emoji |
-| `createdAt` | `Date` | Normalized reaction timestamp |
+| Property    | Type     | Description                     |
+| ----------- | -------- | ------------------------------- |
+| `id`        | `string` | Reaction row id                 |
+| `messageId` | `string` | Target message id               |
+| `actor`     | `string` | Sender handle or `me`/`unknown` |
+| `emoji`     | `string` | Resolved emoji                  |
+| `createdAt` | `Date`   | Normalized reaction timestamp   |
 
 ### `Handle`
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `id` | `string` | Raw handle |
-| `value` | `string` | Same as id |
+| Property     | Type     | Description        |
+| ------------ | -------- | ------------------ |
+| `id`         | `string` | Raw handle         |
+| `value`      | `string` | Same as id         |
 | `normalized` | `string` | Lowercased `value` |
 
 ### `Attachments`
@@ -290,44 +299,43 @@ Throws:
 
 ### `Attachment`
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `id` | `string` | Attachment ROWID |
-| `filename` | `string` | Original stored filename |
-| `transferName` | `string` | User-facing name when present |
-| `mimeType` | `string` | MIME type |
-| `size` | `number` | Byte size |
-| `createdAt` | `Date` | Derived from linked message date |
-| `dataPath` | `string` | Resolved absolute path in backup |
-| `backupId` | `string` | Owning backup id |
-| `path` | `string` | Same as `dataPath` |
-| `chatId` | `string \| undefined` | Parent chat id when known |
-| `messageId` | `string \| undefined` | Parent message id when known |
+| Property       | Type                  | Description                      |
+| -------------- | --------------------- | -------------------------------- |
+| `id`           | `string`              | Attachment ROWID                 |
+| `filename`     | `string`              | Original stored filename         |
+| `transferName` | `string`              | User-facing name when present    |
+| `mimeType`     | `string`              | MIME type                        |
+| `size`         | `number`              | Byte size                        |
+| `createdAt`    | `Date`                | Derived from linked message date |
+| `dataPath`     | `string`              | Resolved absolute path in backup |
+| `backupId`     | `string`              | Owning backup id                 |
+| `path`         | `string`              | Same as `dataPath`               |
+| `chatId`       | `string \| undefined` | Parent chat id when known        |
+| `messageId`    | `string \| undefined` | Parent message id when known     |
 
 ## End-To-End Example
 
 ```ts
-import { intunes } from 'intunes';
+import { intunes } from 'intunes'
 
-const backup = intunes.backups.list()[0];
-if (!backup) throw new Error('No backup found');
+const backup = intunes.backups.list()[0]
+if (!backup) throw new Error('No backup found')
 
-const opened = intunes.backups.get(backup.id);
+const opened = intunes.backups.get(backup.id)
 
-const chats = opened.chats.list({ limit: 10, offset: 0 });
+const chats = opened.chats.list({ limit: 10, offset: 0 })
 for (const chat of chats) {
-	console.log(chat.id, chat.displayName, chat.messageCount);
+	console.log(chat.id, chat.displayName, chat.messageCount)
 
-	const messages = chat.messages.list({ hasAttachment: true });
+	const messages = chat.messages.list({ hasAttachment: true })
 	if (messages[0]) {
-		const fullMessage = chat.messages.get(messages[0].id);
-		console.log(fullMessage?.id, fullMessage?.reactions?.length ?? 0);
+		const fullMessage = chat.messages.get(messages[0].id)
+		console.log(fullMessage?.id, fullMessage?.reactions?.length ?? 0)
 	}
 
-	const attachments = chat.attachments.list({ type: 'image', limit: 5 });
+	const attachments = chat.attachments.list({ type: 'image', limit: 5 })
 	if (attachments[0]) {
-		await chat.attachments.saveToFile(attachments[0].id, `./${attachments[0].transferName}`);
+		await chat.attachments.saveToFile(attachments[0].id, `./${attachments[0].transferName}`)
 	}
 }
 ```
-
