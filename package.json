@@ -1,6 +1,6 @@
 {
 	"name": "intunes",
-	"version": "0.0.4",
+	"version": "0.0.6",
 	"description": "Read iMessage data from local iTunes/Apple device backups on Windows.",
 	"module": "./dist/index.js",
 	"main": "./dist/index.js",

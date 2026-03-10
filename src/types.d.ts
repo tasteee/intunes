@@ -12,6 +12,7 @@ export type BackupListOptionsT = {}
 export type BackupsT = {
 	list(options?: BackupListOptionsT): BackupT[]
 	get(id: string): BackupT
+	convert(id: string): BackupConvertResultT
 }
 
 export type BackupT = {
@@ -27,6 +28,124 @@ export type BackupT = {
 	chats: ChatsT
 	messages: MessagesT // global message-level access
 	attachments: AttachmentsT // global attachment-level access
+	convert(): BackupConvertResultT
+}
+
+export type AuthorRoleT = 'me' | 'participant' | 'system'
+
+export type ConvertedParticipantT = {
+	id: string
+	value: string
+	normalized: string
+	isMe: boolean
+	chatIds: string[]
+}
+
+export type ConvertedReactionT = {
+	id: string
+	messageId: string
+	actor: string
+	actorParticipantId: string | null
+	isByMe: boolean
+	emoji: string
+	createdAt: string | null
+	authorRole: AuthorRoleT
+}
+
+export type ConvertedMessageT = {
+	id: string
+	guid: string | null
+	chatId: string
+	participantId: string | null
+	sender: string | null
+	isFromMe: boolean
+	authorRole: AuthorRoleT
+	text: string | null
+	subject: string | null
+	service: 'iMessage' | 'SMS' | 'MMS' | 'Unknown'
+	sentAt: string | null
+	deliveredAt: string | null
+	readAt: string | null
+	isEdited: boolean
+	isDeleted: boolean
+	isSystem: boolean
+	isTapback: boolean
+	replyToMessageId: string | null
+	threadId: string | null
+	hasAttachments: boolean
+	attachmentIds: string[]
+	reactionIds: string[]
+}
+
+export type ConvertedAttachmentT = {
+	id: string
+	filename: string
+	transferName: string
+	mimeType: string
+	size: number
+	createdAt: string | null
+	dataPath: string
+	thumbnailPath: string | null
+	previewPath: string | null
+	chatId: string | null
+	messageId: string | null
+	participantId: string | null
+	isFromMe: boolean
+	authorRole: AuthorRoleT
+	reactionIds: string[]
+	backupId: string
+	path: string
+}
+
+export type ConvertedChatT = {
+	id: string
+	displayName: string
+	isGroup: boolean
+	participantIds: string[]
+	messageIds: string[]
+	attachmentIds: string[]
+	reactionIds: string[]
+	days: Record<string, string[]>
+}
+
+export type ConvertedWarningT = {
+	code: string
+	message: string
+	id?: string
+}
+
+export type ConvertedOrphansT = {
+	messages: string[]
+	attachments: string[]
+	reactions: string[]
+}
+
+export type BackupConvertResultT = {
+	id: string
+	path: string
+	deviceName: string
+	deviceType: 'iPhone' | 'iPad' | 'iPod' | 'Unknown'
+	iosVersion: string
+	createdAt: string | null
+	modifiedAt: string | null
+	sizeOnDisk: number
+	manifestPath: string
+	formatVersion: string
+	exportedAt: string
+	totalChats: number
+	totalMessages: number
+	totalAttachments: number
+	totalReactions: number
+	totalParticipants: number
+	warningsCount: number
+	orphansCount: number
+	participants: Record<string, ConvertedParticipantT>
+	messages: Record<string, ConvertedMessageT>
+	reactions: Record<string, ConvertedReactionT>
+	attachments: Record<string, ConvertedAttachmentT>
+	chats: ConvertedChatT[]
+	warnings: ConvertedWarningT[]
+	orphans: ConvertedOrphansT
 }
 
 export type ChatsListOptionsT = {

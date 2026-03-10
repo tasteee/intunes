@@ -65,7 +65,7 @@ export const createChats = (db: Database, backupId: string, backupPath: string):
 				backupId,
 				backupPath,
 				row.ROWID,
-				row.display_name || 'Unknown',
+				row.display_name || '',
 				row.chat_identifier || null,
 				participants,
 				Number(row.message_count) || 0
@@ -103,7 +103,7 @@ export const createChats = (db: Database, backupId: string, backupPath: string):
 			backupId,
 			backupPath,
 			row.ROWID,
-			row.display_name || 'Unknown',
+			row.display_name || '',
 			row.chat_identifier || null,
 			participants,
 			Number(row.message_count) || 0

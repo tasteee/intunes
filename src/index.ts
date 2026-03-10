@@ -35,7 +35,11 @@ const backups = (() => {
 		return backup
 	}
 
-	return { list, get }
+	const convert = (id: string) => {
+		return get(id).convert()
+	}
+
+	return { list, get, convert }
 })()
 
 const intunes: IntunesT = (() => {

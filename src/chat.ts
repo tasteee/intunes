@@ -18,7 +18,40 @@ export const createChat = (
 	messageCount: number
 ): ChatT => {
 	const chatId = String(rowId)
+	const normalizedDisplayName = displayName.trim()
+	const normalizedChatIdentifier = typeof chatIdentifier === 'string' ? chatIdentifier.trim() : ''
+	const isGroup = Boolean(chatIdentifier?.includes('chat'))
 	const messages = createMessages(db, backupId, backupPath, rowId)
+
+	const resolveDisplayName = (): string => {
+		if (normalizedDisplayName.length > 0 && normalizedDisplayName.toLowerCase() !== 'unknown') {
+			return normalizedDisplayName
+		}
+
+		const participantIdentifiers = participants
+			.map((participant) => (participant.value || participant.id || '').trim())
+			.filter((identifier) => identifier.length > 0)
+
+		if (participantIdentifiers.length === 1) {
+			const onlyParticipant = participantIdentifiers[0]
+			if (onlyParticipant) return onlyParticipant
+		}
+
+		if (normalizedChatIdentifier.length > 0 && normalizedChatIdentifier.toLowerCase() !== 'unknown') {
+			return normalizedChatIdentifier
+		}
+
+		if (!isGroup && participantIdentifiers.length > 0) {
+			const firstParticipant = participantIdentifiers[0]
+			if (firstParticipant) return firstParticipant
+		}
+
+		if (isGroup && participantIdentifiers.length > 0) {
+			return participantIdentifiers.join(', ')
+		}
+
+		return 'Unknown'
+	}
 
 	const getMessageDates = (): string[] => {
 		const stmt = db.prepare(`
@@ -57,8 +90,8 @@ export const createChat = (
 
 	return {
 		id: chatId,
-		displayName: displayName || 'Unknown',
-		isGroup: Boolean(chatIdentifier?.includes('chat')),
+		displayName: resolveDisplayName(),
+		isGroup,
 		participants,
 		messageCount: Number(messageCount) || 0,
 		messageDates,
